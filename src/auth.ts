@@ -1,67 +1,96 @@
-import NextAuth from "next-auth"
-import Credentials from "next-auth/providers/credentials"
+import NextAuth from "next-auth";
+import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
-import { prisma } from "./lib/prisma";
-// import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
-    providers: [
-        Credentials({
-            name: "Credentials",
-            credentials: {
-                identifier: {
-                    label: "Email or Username",
-                    type: "text"
+export const { handlers, signIn, signOut, auth } = NextAuth({
+  providers: [
+    Credentials({
+      credentials: {
+        identifier: {
+          label: "Email or Username",
+          type: "text",
+        },
+        password: {
+          label: "Password",
+          type: "password",
+        },
+      },
+
+      async authorize(credentials) {
+        if (!credentials?.identifier || !credentials?.password) {
+          return null;
+        }
+
+        const identifier = credentials.identifier as string;
+        const password = credentials.password as string;
+
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              {
+                email: {
+                  equals: identifier,
+                  mode: "insensitive",
                 },
-                password: {
-                    label: "Password",
-                    type: "password",
+              },
+              {
+                username: {
+                  equals: identifier,
+                  mode: "insensitive",
                 },
-            },
-            async authorize(credentials) {
-                if(!credentials?.identifier || !credentials.password) {
-                    return null
-                }
+              },
+            ],
+          },
+        });
 
-                const identifier = String(credentials.identifier)
-                const password = String(credentials.password)
+        if (!user || !user.password) {
+          return null;
+        }
 
-                const user = await prisma.user.findFirst({
-                    where: {
-                        OR: [
-                            { email: {
-                                equals: identifier.trim(),
-                                mode: "insensitive"
-                            }},
-                            {
-                                username: {
-                                    equals: identifier.trim(),
-                                    mode: "insensitive"
-                                }
-                            }
-                        ]
-                    }
-                })
+        const isPasswordValid = await bcrypt.compare(
+          password,
+          user.password
+        );
 
-                if(!user) {
-                    return null
-                }
-            
-                const isPasswordValid = await bcrypt.compare(password, user.password)
-            
-                if(!isPasswordValid) {
-                    return null
-                }
-            
-                return {
-                    id: user.id,
-                    name: user.name,
-                    email: user.email
-                };
-            }
-        })
-    ],
+        if (!isPasswordValid) {
+          return null;
+        }
 
-    session: { strategy: "jwt"},
-    pages: { signIn: "/login"}
-})
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        };
+      },
+    }),
+  ],
+
+  session: {
+    strategy: "jwt",
+  },
+
+  pages: {
+    signIn: "/login",
+  },
+
+  secret: process.env.AUTH_SECRET,
+
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+      }
+
+      return token;
+    },
+
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+      }
+
+      return session;
+    },
+  },
+});
