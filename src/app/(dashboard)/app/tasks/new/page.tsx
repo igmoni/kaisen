@@ -1,11 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { FormDataType } from "@/types/FormDataType";
 import { TaskPriority } from "@/generated/prisma/enums";
 import { createTask } from "@/actions/task-actions";
-import { FormEvent } from "react";
+import { toast } from "sonner";
 
 const page = () => {
+  const router = useRouter();
   const texts = ["Add a task", "Eg: Project Setup", "Eg: Debug the codebase"];
 
   const [formData, setFormData] = useState<FormDataType>({
@@ -28,11 +30,23 @@ const page = () => {
 
   const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
+    try {
+      const task = await createTask(formData);
 
-    await createTask(formData);
+      if (task) {
+        toast.success("Task Created");
+
+        setTimeout(() => {
+          router.push("/app/today");
+        }, 1500);
+      }
+    } catch {
+      toast.error("Failed to create task");
+    }
   };
+
   return (
-    <div className="h-screen w-full flex items-center justify-center">
+    <div className="flex h-screen w-full items-center justify-center">
       <form className="flex flex-col" onSubmit={handleSubmit}>
         <input
           type="text"

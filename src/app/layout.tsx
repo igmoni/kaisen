@@ -28,7 +28,7 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col">
         {children}
-        <Toaster />
+        <Toaster  closeButton className="bg-green-100" offset={"16px"} position="top-right"/>
       </body>
     </html>
   );

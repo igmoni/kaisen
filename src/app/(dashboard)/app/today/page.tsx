@@ -1,20 +1,21 @@
-import { auth } from '@/auth'
-import LogoutButton from '@/components/LogoutBtn';
-import React from 'react'
+import { auth } from "@/auth";
+import LogoutButton from "@/components/LogoutBtn";
+import Link from "next/link";
+import React from "react";
 
 const page = async () => {
   const session = await auth();
-  console.log("SESSION:",session)
+  console.log("SESSION:", session);
   return (
     <div>
       Today
-
-      <h1 className='font-semibold'>{JSON.stringify(session, null, 2)}</h1>
-
+      <h1 className="font-semibold">{JSON.stringify(session, null, 2)}</h1>
+      <Link href={"/app/tasks/new"} className="border px-2 py-1">
+        Create task
+      </Link>
       <LogoutButton />
     </div>
-  )
-}
+  );
+};
 
-export default page
-  
+export default page;

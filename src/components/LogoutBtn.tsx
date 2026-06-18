@@ -10,6 +10,7 @@ export default function LogoutButton() {
           redirectTo: "/login",
         })
       }
+      className="border px-2 py-1"
     >
       Logout
     </button>

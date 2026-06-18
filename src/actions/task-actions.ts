@@ -40,5 +40,5 @@ export const createTask = async ({
 
   revalidatePath("/app");
 
-  redirect("/app/today");
+  return task
 };
