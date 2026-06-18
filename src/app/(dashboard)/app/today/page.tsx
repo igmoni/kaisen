@@ -10,7 +10,7 @@ const page = async () => {
     <div>
       Today
       <h1 className="font-semibold">{JSON.stringify(session, null, 2)}</h1>
-      <Link href={"/app/tasks/new"} className="border px-2 py-1">
+      <Link href={"/app/tasks"} className="border px-2 py-1">
         Create task
       </Link>
       <LogoutButton />

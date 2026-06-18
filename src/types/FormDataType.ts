@@ -6,3 +6,8 @@ export type FormDataType = {
     dueDate: string
     priority: TaskPriority
 }
+
+export type FormType = {
+    identifier: string,
+    password: string
+}

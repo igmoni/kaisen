@@ -40,5 +40,17 @@ export const createTask = async ({
 
   revalidatePath("/app");
 
-  return task
+  return task;
+};
+
+export const listTasks = async () => {
+  const session = await auth();
+
+  const userId = session?.user.id;
+
+  return await prisma.task.findMany({
+    where: {
+      userId,
+    },
+  });
 };
