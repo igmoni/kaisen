@@ -13,7 +13,7 @@ const page = () => {
   });
 
   const handleLogin = async (e: React.SyntheticEvent<HTMLFormElement>) => {
-    e.preventDefault()
+    e.preventDefault();
     const result = await signIn("credentials", {
       identifier: form.identifier,
       password: form.password,

@@ -2,11 +2,10 @@ import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 
-const POST = async (req: Request) => {
+export async function POST(req: Request) {
   try {
-    const body = await req.json();
-
-    const { name, username, email, password } = body;
+    const { name, username, email, password } =
+      await req.json();
 
     if (!name || !username || !email || !password) {
       return NextResponse.json(
@@ -17,17 +16,27 @@ const POST = async (req: Request) => {
 
     const existingUser = await prisma.user.findFirst({
       where: {
-        OR: [{ email }, { username }],
+        OR: [
+          { email },
+          { username },
+        ],
       },
     });
+
     if (existingUser) {
       return NextResponse.json(
-        { message: "User already exists" },
+        {
+          message:
+            "Email or username already exists",
+        },
         { status: 409 }
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(
+      password,
+      10
+    );
 
     const user = await prisma.user.create({
       data: {
@@ -58,6 +67,4 @@ const POST = async (req: Request) => {
       { status: 500 }
     );
   }
-};
-
-export {POST}
+}
